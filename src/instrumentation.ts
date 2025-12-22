@@ -85,12 +85,16 @@ export class BunyanInstrumentation extends InstrumentationBase {
           inherits(LoggerTraced, Logger);
 
           const patchedExports = Object.assign(LoggerTraced, Logger);
+          // Ensure patchedExports.prototype points to LoggerTraced.prototype
+          // so that prototype modifications (like bunyan.prototype.monitor = ...)
+          // work correctly on logger instances
+          patchedExports.prototype = LoggerTraced.prototype;
 
           this._wrap(
             patchedExports,
             'createLogger',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            this._getPatchedCreateLogger() as any
+            this._getPatchedCreateLogger(LoggerTraced.prototype) as any
           );
 
           return patchedExports;
@@ -138,11 +142,14 @@ export class BunyanInstrumentation extends InstrumentationBase {
     };
   }
 
-  private _getPatchedCreateLogger() {
+  private _getPatchedCreateLogger(loggerTracedPrototype: any) {
     return (original: (...args: unknown[]) => void) => {
       const instrumentation = this;
       return function patchedCreateLogger(...args: unknown[]) {
         const logger = original(...args);
+        // Ensure logger instances inherit from LoggerTraced.prototype so that
+        // prototype modifications (like bunyan.prototype.monitor = ...) work correctly
+        Object.setPrototypeOf(logger, loggerTracedPrototype);
         instrumentation._addStream(logger);
         return logger;
       };
