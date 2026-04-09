@@ -6,13 +6,14 @@ on:
       - "main"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: read-all
 
 jobs:
   release-job:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Check out code
@@ -20,11 +21,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get release token
+        uses: odigos-io/ci-core@main
+        id: release-token
+        with:
+          identity: releaser
+
       - name: Create or Update Release PR
         uses: googleapis/release-please-action@v4
         id: release
         with:
-          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+          token: ${{ steps.release-token.outputs.GH_TOKEN }}
 
       # The logic below handles the npm publication:
       - uses: actions/setup-node@v4
