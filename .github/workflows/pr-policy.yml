@@ -11,8 +11,9 @@ on:
 
 jobs:
   require-linear:
-    uses: odigos-io/ci-core/.github/workflows/require-linear.yml@v1
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: odigos-io/ci-core/require-linear@main
 
   release-note:
     runs-on: ubuntu-latest
