@@ -1,5 +1,5 @@
 issuer: https://token.actions.githubusercontent.com
-subject_pattern: "^repo:odigos-io/instrumentation-bunyan:ref:refs/heads/main$"
+subject_pattern: "^repo:odigos-io(@84347062)?/instrumentation-bunyan(@1120721993)?:ref:refs/heads/main$"
 
 permissions:
   contents: write
